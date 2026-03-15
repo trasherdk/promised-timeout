@@ -1,39 +1,30 @@
-/*
-* A timeout helper function resolves the provider promise but rejects if the
-* operation takes longer then the provided `timeout`.
-*/
+export interface TimeoutOptions<T> {
+  action: (() => T | Promise<T>) | Promise<T>;
+  time?: number;
+  error?: unknown;
+}
 
-export function timeout ({
-  action, 
+export function timeout<T>({
+  action,
   time = 0,
-  error = new Error()
-}: {
-  action: () => (any | Promise<any>),
-  time: number, 
-  error: Error
-}): Promise<any> {
-  let timer = null;
+  error = new Error("timeout"),
+}: TimeoutOptions<T>): Promise<T> {
+  if (!action) throw new Error("no action provided");
 
-  if (!action) throw new Error('no action provided');
+  let timer: ReturnType<typeof setTimeout> | undefined;
 
-  let sleep = time > 0
-    ? new Promise((resolve, reject) => (timer = setTimeout(reject, time, error)))
-    : null;
-  
-  let run = Promise.resolve().then(() => {
-    return action instanceof Promise ? action : action();
-  }).then((value) => {
+  const run = Promise.resolve().then(() =>
+    typeof action === "function" ? action() : action,
+  ).then((value) => {
     clearTimeout(timer);
     return value;
   });
 
-  return Promise.race(
-    [run, sleep].filter(p => !!p)
-  ).then((res) => {
-    if (res === error) {
-      throw error;
-    } else {
-      return res;
-    }
+  if (time <= 0) return run;
+
+  const sleep = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(reject, time, error);
   });
+
+  return Promise.race([run, sleep]);
 }
