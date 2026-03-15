@@ -1,44 +1,46 @@
 {
-  "name": "promised-timeout",
-  "version": "0.5.1",
+  "name": "@trasherdk/promised-timeout",
+  "version": "1.0.0",
+  "type": "module",
   "description": "For limiting the time to resolve a promise.",
-  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && ava",
-    "prepublish": "npm run build"
+    "test": "vitest run",
+    "prepublishOnly": "pnpm build"
   },
-  "ava": {
-    "files": [
-      "./tests/*.js",
-      "./tests/**/*.js"
-    ],
-    "concurrency": 1,
-    "failFast": true
+  "engines": {
+    "node": ">=18"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xpepermint/promised-timeout.git"
+    "url": "git+https://github.com/trasherdk/promised-timeout.git"
   },
   "keywords": [
     "promise",
     "timeout",
-    "delay",
-    "promised",
-    "as",
-    "with",
-    "resolve",
-    "reject"
+    "delay"
   ],
   "bugs": {
-    "url": "https://github.com/xpepermint/promised-timeout/issues"
+    "url": "https://github.com/trasherdk/promised-timeout/issues"
   },
-  "homepage": "https://github.com/xpepermint/promised-timeout#readme",
+  "homepage": "https://github.com/trasherdk/promised-timeout#readme",
   "author": "Kristijan Sedlak (Xpepermint)",
+  "contributors": [
+    "trasherdk"
+  ],
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.19.1",
-    "typescript": "^2.3.2"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   }
 }

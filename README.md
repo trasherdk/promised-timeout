@@ -1,48 +1,49 @@
-![Build Status](https://travis-ci.org/xpepermint/promised-timeout.svg?branch=master)&nbsp;[![NPM Version](https://badge.fury.io/js/promised-timeout.svg)](https://badge.fury.io/js/promised-timeout)&nbsp;[![Dependency Status](https://gemnasium.com/xpepermint/promised-timeout.svg)](https://gemnasium.com/xpepermint/promised-timeout)
-
-# promised-timeout
+# @trasherdk/promised-timeout
 
 > For limiting the time to resolve a promise.
 
-This is a light weight open source package, written with [TypeScript](https://www.typescriptlang.org). The source code is available on [GitHub](https://github.com/xpepermint/promised-timeout) where you can also find our [issue tracker](https://github.com/xpepermint/promised-timeout/issues).
+This is a maintained fork of [promised-timeout](https://github.com/xpepermint/promised-timeout) by Kristijan Sedlak, which is no longer actively maintained. This fork has been modernized with TypeScript strict mode, ESM-only output, and current tooling.
 
-## Related Projects
+## Changes from the original
 
-* [promised-debounce](https://github.com/xpepermint/promised-debounce): For debounced function execution.
-
-## Motivation
-
-Using the native `Promise.race` method for implementing the `Promise.timeout` function is not sufficient. The `Promise.race` doesn't clear the timer of the timeout promise after the actual promise resolves thus the process will wait until the timeout promise is also complete. This means that if you set the timeout to 1h and our promise completes after 1min, the process will wait for another 59min before it exits.
+- Rewritten as strict TypeScript with generic return types
+- ESM-only (no CommonJS)
+- Vitest instead of AVA
+- Node.js >= 18
 
 ## Install
 
 ```
-$ npm install --save promised-timeout
+pnpm add @trasherdk/promised-timeout
 ```
 
 ## Example
 
-```js
-import { timeout } from 'promised-timeout';
+```ts
+import { timeout } from '@trasherdk/promised-timeout';
 
-await timeout({
-  action: () => new Promise(), // your promise here
-  time: 100,
-  error: new Error('operation timeout')
+const result = await timeout({
+  action: () => fetch('https://example.com'),
+  time: 5000,
+  error: new Error('request timed out'),
 });
 ```
 
 ## API
 
-**timeout({ action, timeout, error })**:Promise
+**timeout\<T\>({ action, time, error }): Promise\<T\>**
 
-> A timeout helper function resolves the provider promise but rejects if the operation takes too long.
+A timeout helper that resolves with the action's result, or rejects if the action takes longer than the specified time.
 
 | Option | Type | Required | Default | Description
 |--------|------|----------|---------|------------
-| action | Function,Promise | Yes | - | A Promise object to resolve.
-| time | Integer | No | 0 | A time in milliseconds after the operation automatically rejects (`0` disables the timeout).
-| error | Error | No | new Error() | A custom error object to pass to the `reject` handler.
+| action | `(() => T \| Promise<T>) \| Promise<T>` | Yes | - | A function returning a value/promise, or a promise directly.
+| time | `number` | No | `0` | Milliseconds before the operation rejects (`0` disables the timeout).
+| error | `unknown` | No | `new Error("timeout")` | Value to reject with on timeout.
+
+## Motivation
+
+`Promise.race` alone is insufficient for timeouts. It doesn't clear the timer after the actual promise resolves, so the process hangs until the timeout expires. If you set a 1-hour timeout and the promise resolves in 1 minute, the process waits another 59 minutes. This library clears the timer as soon as the action resolves.
 
 ## License (MIT)
 
